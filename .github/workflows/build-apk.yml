@@ -28,9 +28,9 @@ jobs:
       - name: Extract VR Space
         run: unzip -q VRSpace-Android-mobile-build.zip -d source
 
-       - name: Build APK
-        working-directory: source/VRSpace-Android
-        run: gradle --no-daemon assembleDebug
+     - name: Build APK
+      working-directory: source/VRSpace-Android
+      run: gradle --no-daemon assembleDebug
 
       - name: Save APK
         uses: actions/upload-artifact@v4
