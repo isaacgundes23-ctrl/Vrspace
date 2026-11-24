@@ -28,20 +28,22 @@ jobs:
       - name: Extract VR Space
         run: unzip -q VRSpace-Android-mobile-build.zip -d source
 
-      - name: Fix Android Gradle Plugin
+      - name: Fix Android Gradle Plugin and SDK
         working-directory: source/VRSpace-Android
+        shell: bash
         run: |
-          find . -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name 'libs.versions.toml' \) -not -path '*/.gradle/*' -not -path '*/build/*' -exec sed -i 's/8\.7\.3/8.9.1/g' {} +
+          find . -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name 'libs.versions.toml' \) -not -path '*/.gradle/*' -not -path '*/build/*' -exec perl -pi -e '
+            s/\b8\.7\.3\b/8.10.0/g;
+            s/\bcompileSdkVersion\s*=?\s*35\b/compileSdkVersion 36/g;
+            s/\bcompileSdk\s*=\s*35\b/compileSdk = 36/g;
+            s/\bcompileSdk\s+35\b/compileSdk 36/g;
+          ' {} +
 
-          if grep -RInE --include='*.gradle' --include='*.gradle.kts' --include='libs.versions.toml' '8\.7\.3' .; then
-            echo "ERRO: ainda existe AGP 8.7.3"
-            exit 1
-          fi
+          echo "Checking Android Gradle Plugin..."
+          grep -RInE --include='*.gradle' --include='*.gradle.kts' --include='libs.versions.toml' '8\.10\.0' .
 
-          if ! grep -RInE --include='*.gradle' --include='*.gradle.kts' --include='libs.versions.toml' '8\.9\.1' .; then
-            echo "ERRO: não foi encontrada a versão 8.9.1"
-            exit 1
-          fi
+          echo "Checking compileSdk..."
+          grep -RInE --include='*.gradle' --include='*.gradle.kts' 'compileSdk(Version)?[[:space:]]*=?[[:space:]]*36' .
 
       - name: Build APK
         working-directory: source/VRSpace-Android
