@@ -28,7 +28,9 @@ jobs:
       - name: Extract VR Space
         run: unzip -q VRSpace-Android-mobile-build.zip -d source
 
-      - name: Build APK
+            - name: Fix Android Gradle Plugin
+        working-directory: source/VRSpace-Android
+        run: sed -i 's/8.7.3/8.9.1/g' build.gradle- name: Build APK
         working-directory: source/VRSpace-Android
         run: gradle --no-daemon assembleDebug
 
