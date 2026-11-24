@@ -28,9 +28,22 @@ jobs:
       - name: Extract VR Space
         run: unzip -q VRSpace-Android-mobile-build.zip -d source
 
-            - name: Fix Android Gradle Plugin
+      - name: Fix Android Gradle Plugin
         working-directory: source/VRSpace-Android
-        run: sed -i 's/8.7.3/8.9.1/g' build.gradle- name: Build APK
+        run: |
+          find . -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name 'libs.versions.toml' \) -not -path '*/.gradle/*' -not -path '*/build/*' -exec sed -i 's/8\.7\.3/8.9.1/g' {} +
+
+          if grep -RInE --include='*.gradle' --include='*.gradle.kts' --include='libs.versions.toml' '8\.7\.3' .; then
+            echo "ERRO: ainda existe AGP 8.7.3"
+            exit 1
+          fi
+
+          if ! grep -RInE --include='*.gradle' --include='*.gradle.kts' --include='libs.versions.toml' '8\.9\.1' .; then
+            echo "ERRO: não foi encontrada a versão 8.9.1"
+            exit 1
+          fi
+
+      - name: Build APK
         working-directory: source/VRSpace-Android
         run: gradle --no-daemon assembleDebug
 
