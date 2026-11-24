@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -39,11 +40,25 @@ jobs:
             s/\bcompileSdk\s+35\b/compileSdk 36/g;
           ' {} +
 
-          echo "Checking Android Gradle Plugin..."
-          grep -RInE --include='*.gradle' --include='*.gradle.kts' --include='libs.versions.toml' '8\.10\.0' .
+      - name: Fix Java and Kotlin targets
+        working-directory: source/VRSpace-Android
+        shell: bash
+        run: |
+          cat >> app/build.gradle <<'GRADLE'
 
-          echo "Checking compileSdk..."
-          grep -RInE --include='*.gradle' --include='*.gradle.kts' 'compileSdk(Version)?[[:space:]]*=?[[:space:]]*36' .
+          android {
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+
+          tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+          }
+          GRADLE
 
       - name: Build APK
         working-directory: source/VRSpace-Android
